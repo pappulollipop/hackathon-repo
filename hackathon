@@ -1,0 +1,175 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+disease_data_file = '/content/Final_Augmented_dataset_Diseases_and_Symptoms.csv (1).zip'
+disease_data = pd.read_csv(disease_data_file)
+disease_data.describe()
+
+disease_data.head()
+
+import pandas as pd
+import numpy as np
+import json
+from sklearn.preprocessing import LabelEncoder
+
+# ===== MAIN FUNCTION: ENCODE DISEASES AND CREATE COMPLETE RECORD =====
+def encode_diseases_complete(df, disease_column='diseases', save_files=True):
+
+    print("Starting disease encoding process...")
+    print(f"Original data shape: {df.shape}")
+    print(f"Disease column: '{disease_column}'")
+
+    # Check if disease column exists
+    if disease_column not in df.columns:
+        raise ValueError(f"Column '{disease_column}' not found in DataFrame")
+
+    # Create label encoder
+    encoder = LabelEncoder()
+
+    # Create copy of DataFrame
+    encoded_df = df.copy()
+
+    # Get unique diseases before encoding
+    unique_diseases = df[disease_column].unique()
+    print(f"Found {len(unique_diseases)} unique diseases: {list(unique_diseases)}")
+
+    # Encode diseases
+    encoded_df[f'{disease_column}_encoded'] = encoder.fit_transform(encoded_df[disease_column])
+
+    # Create comprehensive mapping dictionaries
+    disease_to_number = {disease: int(code) for code, disease in enumerate(encoder.classes_)}
+    number_to_disease = {int(code): disease for code, disease in enumerate(encoder.classes_)}
+
+    # Create complete mapping record
+    mappings = {
+        'disease_to_number': disease_to_number,
+        'number_to_disease': number_to_disease,
+        'encoder_classes': encoder.classes_.tolist(),
+        'total_diseases': len(unique_diseases),
+        'encoding_info': {
+            'method': 'LabelEncoder',
+            'range': f'0 to {len(unique_diseases)-1}',
+            'total_records': len(df)
+        }
+    }
+
+    # Display mapping information
+    print("\n" + "="*50)
+    print("DISEASE ENCODING MAPPING")
+    print("="*50)
+    for disease, code in disease_to_number.items():
+        print(f"  '{disease}' → {code}")
+
+    # Show distribution
+    print("\n" + "="*50)
+    print("DISEASE DISTRIBUTION")
+    print("="*50)
+    distribution = encoded_df[f'{disease_column}_encoded'].value_counts().sort_index()
+    for code, count in distribution.items():
+        disease_name = number_to_disease[code]
+        percentage = (count / len(encoded_df)) * 100
+        print(f"  Code {code} ({disease_name}): {count} records ({percentage:.1f}%)")
+
+    # Save files if requested
+    if save_files:
+        # Save mapping as JSON
+        with open('disease_encoding_mapping.json', 'w') as f:
+            json.dump(mappings, f, indent=2)
+
+        # Save mapping as CSV
+        mapping_df = pd.DataFrame({
+            'Disease_Name': list(disease_to_number.keys()),
+            'Disease_Code': list(disease_to_number.values())
+        })
+        mapping_df.to_csv('disease_encoding_mapping.csv', index=False)
+
+        # Save encoded dataframe
+        encoded_df.to_csv('data_with_encoded_diseases.csv', index=False)
+
+        print("\n✓ Files saved:")
+        print("  - disease_encoding_mapping.json")
+        print("  - disease_encoding_mapping.csv")
+        print("  - data_with_encoded_diseases.csv")
+
+    return encoded_df, mappings
+
+# ===== GROUPING FUNCTION WITH ENCODED DISEASES =====
+def group_by_encoded_diseases(encoded_df, mappings, disease_column='diseases'):
+    """
+    Group data by encoded diseases and calculate averages
+    """
+    print("\n" + "="*50)
+    print("GROUPING BY ENCODED DISEASES")
+    print("="*50)
+
+    # Select only numeric columns for grouping
+    numeric_columns = encoded_df.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Remove the encoded disease column from the grouping calculation
+    symptom_columns = [col for col in numeric_columns if not col.endswith('_encoded')]
+
+    print(f"Grouping by: {disease_column}_encoded")
+    print(f"Calculating averages for: {symptom_columns}")
+
+    # Group by encoded diseases
+    grouped_data = encoded_df[symptom_columns].groupby(encoded_df[f'{disease_column}_encoded']).mean().round(3)
+
+    # Create version with disease names for reference
+    grouped_with_names = grouped_data.copy()
+    grouped_with_names.index = [f"Code_{idx}_({mappings['number_to_disease'][idx]})"
+                               for idx in grouped_with_names.index]
+
+    print("\nGrouped data by encoded diseases:")
+    print(grouped_data)
+
+    # Save grouped data
+    grouped_data.to_csv('grouped_data_by_encoded_diseases.csv')
+    grouped_with_names.to_csv('grouped_data_with_disease_names.csv')
+
+    print("\n✓ Grouped data saved:")
+    print("  - grouped_data_by_encoded_diseases.csv")
+    print("  - grouped_data_with_disease_names.csv")
+
+    return grouped_data, grouped_with_names
+
+# ===== UTILITY FUNCTIONS =====
+def load_disease_mapping(json_file='disease_encoding_mapping.json'):
+    """Load disease mapping from saved JSON file"""
+    with open(json_file, 'r') as f:
+        return json.load(f)
+
+def disease_name_to_code(disease_name, mappings):
+    """Convert disease name to code"""
+    return mappings['disease_to_number'].get(disease_name, None)
+
+def disease_code_to_name(code, mappings):
+    """Convert disease code to name"""
+    return mappings['number_to_disease'].get(code, None)
+
+def show_complete_mapping_info(mappings):
+    """Display complete mapping information"""
+    print("="*50)
+    print("COMPLETE DISEASE MAPPING INFORMATION")
+    print("="*50)
+    print(f"Total diseases: {mappings['total_diseases']}")
+    print(f"Encoding method: {mappings['encoding_info']['method']}")
+    print(f"Code range: {mappings['encoding_info']['range']}")
+    print(f"Total records: {mappings['encoding_info']['total_records']}")
+    print("\nComplete mapping:")
+    for disease, code in mappings['disease_to_number'].items():
+        print(f"  '{disease}' ↔ {code}")
+df, mappings = encode_diseases_complete(disease_data)
+grouped_data, grouped_with_names= group_by_encoded_diseases(df, mappings)
+code = disease_name_to_code('panic disorder', mappings)
+name = disease_code_to_name(0, mappings)
+show_complete_mapping_info(mappings)
+
+df.head()
+
+
+# Split the data into training and testing sets
+X = df.drop(["diseases", 'diseases_encoded'],axis=1)
+y = df["diseases_encoded"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
