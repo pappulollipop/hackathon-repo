@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Sahayak - Disease Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 80px;
+        }
+
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .menu-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .menu-button.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .menu-button.danger:hover {
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .menu-button.success {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        }
+
+        .menu-button.success:hover {
+            box-shadow: 0 10px 25px rgba(81, 207, 102, 0.3);
+        }
+
+        .menu-button.warning {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+        }
+
+        .menu-button.warning:hover {
+            box-shadow: 0 10px 25px rgba(255, 212, 59, 0.3);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-section h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .symptom-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .symptom-textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #339af0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .symptoms-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .symptom-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .symptom-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .symptom-name {
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a24;
+        }
+
+        .predictions-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #4facfe;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .prediction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .disease-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #495057;
+            text-transform: capitalize;
+        }
+
+        .confidence-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .confidence-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .confidence-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .confidence-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .confidence-value {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .recommendation {
+            color: #495057;
+            font-style: italic;
+        }
+
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .disclaimer-title {
+            color: #856404;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .disclaimer-text {
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                padding: 25px;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Health Sahayak</h1>
+            <p class="subtitle">Advanced Disease Prediction System - Get top 3 disease predictions with confidence levels</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Main Menu -->
+            <div id="main-menu" class="section active">
+                <div class="menu-grid">
+                    <button class="menu-button" onclick="showSection('add-symptoms')">
+                        ➕ Add Symptoms
+                    </button>
+                    <button class="menu-button danger" onclick="showSection('remove-symptom')" id="remove-btn">
+                        🗑️ Remove Symptom
+                    </button>
+                    <button class="menu-button success" onclick="showSection('view-status')">
+                        👁️ View Current Status
+                    </button>
+                    <button class="menu-button warning" onclick="clearAll()" id="clear-btn">
+                        🔄 Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Symptoms Section -->
+            <div id="add-symptoms" class="section">
+                <div class="input-section">
+                    <h3>💬 Describe Your Symptoms</h3>
+                    <textarea
+                        id="symptom-input"
+                        class="symptom-textarea"
+                        placeholder="Describe your symptoms in natural language (e.g., 'I have severe headache, chest pain, and feeling nauseous')"
+                    ></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="analyzeSymptoms()" id="analyze-btn">
+                            🔍 Analyze Symptoms
+                        </button>
+                        <button class="btn btn-secondary" onclick="showSection('main-menu')">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remove Symptom Section -->
+            <div id="remove-symptom" class="section">
+                <div class="input-section">
+                    <h3>🗑️ Remove Symptom</h3>
+                    <div id="remove-symptoms-list" class="symptoms-list">
+                        <!-- Symptoms will be populated here -->
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="showSection('main-menu')">
+                            ❌ Back to Main Menu
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Status Section -->
+            <div id="view-status" class="section">
+                <div class="input-section">
+                    <h3>📋 Current Symptoms (<span id="symptom-count">0</span>)</h3>
+                    <div id="current-symptoms-list" class="symptoms-list">
+                        <!-- Current symptoms will be shown here -->
+                    </div>
+                </div>
+
+                <div id="predictions-container" class="predictions-section" style="display: none;">
+                    <h3>🎯 Top 3 Disease Predictions</h3>
+                    <div id="predictions-list">
+                        <!-- Predictions will be shown here -->
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="showSection('main-menu')">
+                        ❌ Back to Main Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-title">
+                ⚠️ Important Disclaimer
+            </div>
+            <div class="disclaimer-text">
+                This tool is for informational purposes only. Always consult healthcare professionals for proper diagnosis and treatment.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let symptoms = [];
+let predictions = [];
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
+ function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // Show target section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update content based on section
+            if (sectionId === 'remove-symptom') {
+                updateRemoveSymptomsList();
+            } else if (sectionId === 'view-status') {
+                updateCurrentStatus();
+            }
+
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            const removeBtn = document.getElementById('remove-btn');
+            const clearBtn = document.getElementById('clear-btn');
+
+            if (symptoms.length === 0) {
+                removeBtn.disabled = true;
+                clearBtn.disabled = true;
+            } else {
+                removeBtn.disabled = false;
+                clearBtn.disabled = false;
+            }
+        }
+
+        async function analyzeSymptoms() {
+            const input = document.getElementById('symptom-input');
+            const analyzeBtn = document.getElementById('analyze-btn');
+
+            if (!input.value.trim()) return;
+
+            // Show loading state
+            analyzeBtn.innerHTML = '<div class="loading"><div class="spinner"></div>Processing...</div>';
+            analyzeBtn.disabled = true;
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Mock symptom extraction
+            const extractedSymptoms = ['severe headache', 'chest pain', 'nausea'];
+
+            // Add new symptoms
+            extractedSymptoms.forEach((symptom, index) => {
+                symptoms.push({
+                    id: symptoms.length + index + 1,
+                    name: symptom
+                });
+            });
+
+            // Update predictions
+            predictions = mockPrediction(symptoms);
+
+            // Reset form
+            input.value = '';
+            analyzeBtn.innerHTML = '🔍 Analyze Symptoms';
+            analyzeBtn.disabled = false;
+
+            // Show success message and go back to main menu
+            alert(`✅ Detected and added ${extractedSymptoms.length} new symptoms:\n${extractedSymptoms.map(s => `• ${s}`).join('\n')}`);
+            showSection('main-menu');
+        }
+
+        function removeSymptom(id) {
+            symptoms = symptoms.filter(symptom => symptom.id !== id);
+            predictions = mockPrediction(symptoms);
+            updateRemoveSymptomsList();
+            updateButtonStates();
+        }
+
+        function clearAll() {
+            if (symptoms.length === 0) return;
+
+            if (confirm('Are you sure you want to clear all symptoms?')) {
+                symptoms = [];
+                predictions = [];
+                updateButtonStates();
+                alert('All symptoms cleared successfully!');
+            }
+        }
+
+        function updateRemoveSymptomsList() {
+            const container = document.getElementById('remove-symptoms-list');
+
+            if (symptoms.length === 0) {
+                container.innerHTML = '<div class="empty-state">No symptoms to remove.</div>';
+                return;
+            }
+
+            container.innerHTML = symptoms.map(symptom => `
+                <div class="symptom-item">
+                    <span class="symptom-name">${symptom.name}</span>
+                    <button class="remove-btn" onclick="removeSymptom(${symptom.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function updateCurrentStatus() {
+            // Update symptom count
+            document.getElementById('symptom-count').textContent = symptoms.length;
+
+            // Update symptoms list
+            const symptomsContainer = document.getElementById('current-symptoms-list');
+            if (symptoms.length === 0) {
+                symptomsContainer.innerHTML = '<div class="empty-state">No symptoms recorded yet.</div>';
+            } else {
+                symptomsContainer.innerHTML = symptoms.map((symptom, index) => `
+                    <div class="symptom-item">
+                        <span><strong>${index + 1}.</strong> ${symptom.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Update predictions
+            const predictionsContainer = document.getElementById('predictions-container');
+            const predictionsList = document.getElementById('predictions-list');
+
+            if (predictions.length > 0) {
+                predictionsContainer.style.display = 'block';
+                predictionsList.innerHTML = predictions.map(disease => {
+                    const confidenceClass = disease.confidence < 30 ? 'confidence-low' :
+                                          disease.confidence < 70 ? 'confidence-medium' : 'confidence-high';
+                    const confidenceLabel = disease.confidence < 30 ? 'LOW CONFIDENCE' :
+                                          disease.confidence < 70 ? 'MEDIUM CONFIDENCE' : 'HIGH CONFIDENCE';
+                    const confidenceIcon = disease.confidence < 30 ? '🟢' :
+                                         disease.confidence < 70 ? '🟡' : '🔴';
+
+                    return `
+                        <div class="prediction-item">
+                            <div class="prediction-header">
+                                <div class="disease-name">${disease.name}</div>
+                                <div class="confidence-badge ${confidenceClass}">
+                                    ${confidenceIcon} ${confidenceLabel}
+                                </div>
+                            </div>
+                            <div class="confidence-value">Confidence: ${disease.confidence.toFixed(2)}%</div>
+                            <div class="recommendation">💡 Recommendation: ${disease.recommendation}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                predictionsContainer.style.display = 'none';
+            }
+        }
+
+        // Initialize the application
+        updateButtonStates();
+
+function showSection(sectionId) {
+    // Hide all sections
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => section.classList.remove('active'));
+
+    // Show target section
+    document.getElementById(sectionId).classList.add('active');
+
+    // Update content based on section
+    if (sectionId === 'remove-symptom') {
+        updateRemoveSymptomsList();
+    } else if (sectionId === 'view-status') {
+        updateCurrentStatus();
+    }
+
+    updateButtonStates();
+}
+
+function updateButtonStates() {
+    const removeBtn = document.getElementById('remove-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    if (symptoms.length === 0) {
+        removeBtn.disabled = true;
+        clearBtn.disabled = true;
+    } else {
+        removeBtn.disabled = false;
+        clearBtn.disabled = false;
+    }
+}
+
+async function analyzeSymptoms() {
+    const input = document.getElementById('symptom-input');
+    const analyzeBtn = document.getElementById('analyze-btn');
+
+    if (!input.value.trim()) return;
+
+    // Show loading state
+    analyzeBtn.innerHTML = '<div class="loading"><div class="spinner"></div>Processing...</div>';
+    analyzeBtn.disabled = true;
+
+    try {
+        const response = await fetch(${API_BASE_URL}/analyze_symptoms, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symptoms: input.value.trim()
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update symptoms list
+            data.new_symptoms.forEach((symptom, index) => {
+                symptoms.push({
+                    id: Date.now() + index,
+                    name: symptom
+                });
+            });
+
+            // Update predictions
+            predictions = data.predictions;
+
+            // Reset form
+            input.value = '';
+
+            // Show success message
+            if (data.new_symptoms.length > 0) {
+                alert(✅ Detected and added ${data.new_symptoms.length} new symptoms:\n${data.new_symptoms.map(s => • ${s}).join('\n')});
+            } else {
+                alert('⚠ No new symptoms detected from your description. Try being more specific or use medical terms.');
+            }
+
+            showSection('main-menu');
+        } else {
+            alert(❌ Error: ${data.error});
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Failed to analyze symptoms. Please try again.');
+    } finally {
+        // Reset button
+        analyzeBtn.innerHTML = '🔍 Analyze Symptoms';
+        analyzeBtn.disabled = false;
+    }
+}
+
+async function removeSymptom(id) {
+    const symptom = symptoms.find(s => s.id === id);
+    if (!symptom) return;
+
+    try {
+        const response = await fetch(${API_BASE_URL}/remove_symptom, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symptom_name: symptom.name
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            symptoms = symptoms.filter(s => s.id !== id);
+            predictions = data.predictions;
+            updateRemoveSymptomsList();
+            updateButtonStates();
+            alert(✅ Removed symptom: ${symptom.name});
+        } else {
+            alert(❌ Error: ${data.error});
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Failed to remove symptom. Please try again.');
+    }
+}
+
+async function clearAll() {
+    if (symptoms.length === 0) return;
+
+    if (confirm('Are you sure you want to clear all symptoms?')) {
+        try {
+            const response = await fetch(${API_BASE_URL}/clear_all, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                symptoms = [];
+                predictions = [];
+                updateButtonStates();
+                alert('✅ All symptoms cleared successfully!');
+            } else {
+                alert(❌ Error: ${data.error});
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Failed to clear symptoms. Please try again.');
+        }
+    }
+}
+
+async function updateCurrentStatus() {
+    try {
+        const response = await fetch(${API_BASE_URL}/get_status);
+        const data = await response.json();
+
+        if (data.success) {
+            // Update symptoms from server
+            symptoms = data.symptoms.map((symptom, index) => ({
+                id: index + 1,
+                name: symptom
+            }));
+
+            predictions = data.predictions;
+
+            // Update UI
+            updateStatusDisplay();
+        }
+    } catch (error) {
+        console.error('Error fetching status:', error);
+    }
+}
+
+function updateStatusDisplay() {
+    // Update symptom count
+    document.getElementById('symptom-count').textContent = symptoms.length;
+
+    // Update symptoms list
+    const symptomsContainer = document.getElementById('current-symptoms-list');
+    if (symptoms.length === 0) {
+        symptomsContainer.innerHTML = '<div class="empty-state">No symptoms recorded yet.</div>';
+    } else {
+        symptomsContainer.innerHTML = symptoms.map((symptom, index) => `
+            <div class="symptom-item">
+                <span><strong>${index + 1}.</strong> ${symptom.name}</span>
+            </div>
+        `).join('');
+    }
+
+    // Update predictions
+    const predictionsContainer = document.getElementById('predictions-container');
+    const predictionsList = document.getElementById('predictions-list');
+
+    if (predictions.length > 0) {
+        predictionsContainer.style.display = 'block';
+        predictionsList.innerHTML = predictions.map(disease => {
+            const confidenceClass = disease.confidence < 30 ? 'confidence-low' :
+                                  disease.confidence < 70 ? 'confidence-medium' : 'confidence-high';
+            const confidenceLabel = disease.confidence < 30 ? 'LOW CONFIDENCE' :
+                                  disease.confidence < 70 ? 'MEDIUM CONFIDENCE' : 'HIGH CONFIDENCE';
+            const confidenceIcon = disease.confidence < 30 ? '🟢' :
+                                 disease.confidence < 70 ? '🟡' : '🔴';
+
+            return `
+                <div class="prediction-item">
+                    <div class="prediction-header">
+                        <div class="disease-name">${disease.name}</div>
+                        <div class="confidence-badge ${confidenceClass}">
+                            ${confidenceIcon} ${confidenceLabel}
+                        </div>
+                    </div>
+                    <div class="confidence-value">Confidence: ${disease.confidence.toFixed(2)}%</div>
+                    <div class="recommendation">💡 Recommendation: ${disease.recommendation}</div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        predictionsContainer.style.display = 'none';
+    }
+}
+
+function updateRemoveSymptomsList() {
+    const container = document.getElementById('remove-symptoms-list');
+
+    if (symptoms.length === 0) {
+        container.innerHTML = '<div class="empty-state">No symptoms to remove.</div>';
+        return;
+    }
+
+    container.innerHTML = symptoms.map(symptom => `
+        <div class="symptom-item">
+            <span class="symptom-name">${symptom.name}</span>
+            <button class="remove-btn" onclick="removeSymptom(${symptom.id})">Remove</button>
+        </div>
+    `).join('');
+}
+
+// Initialize the application
+updateButtonStates();
+
+    function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // Show target section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update content based on section
+            if (sectionId === 'remove-symptom') {
+                updateRemoveSymptomsList();
+            } else if (sectionId === 'view-status') {
+                updateCurrentStatus();
+            }
+
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            const removeBtn = document.getElementById('remove-btn');
+            const clearBtn = document.getElementById('clear-btn');
+
+            if (symptoms.length === 0) {
+                removeBtn.disabled = true;
+                clearBtn.disabled = true;
+            } else {
+                removeBtn.disabled = false;
+                clearBtn.disabled = false;
+            }
+        }
+
+        async function analyzeSymptoms() {
+            const input = document.getElementById('symptom-input');
+            const analyzeBtn = document.getElementById('analyze-btn');
+
+            if (!input.value.trim()) return;
+
+            // Show loading state
+            analyzeBtn.innerHTML = '<div class="loading"><div class="spinner"></div>Processing...</div>';
+            analyzeBtn.disabled = true;
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Mock symptom extraction
+            const extractedSymptoms = ['severe headache', 'chest pain', 'nausea'];
+
+            // Add new symptoms
+            extractedSymptoms.forEach((symptom, index) => {
+                symptoms.push({
+                    id: symptoms.length + index + 1,
+                    name: symptom
+                });
+            });
+
+            // Update predictions
+            predictions = mockPrediction(symptoms);
+
+            // Reset form
+            input.value = '';
+            analyzeBtn.innerHTML = '🔍 Analyze Symptoms';
+            analyzeBtn.disabled = false;
+
+            // Show success message and go back to main menu
+            alert(`✅ Detected and added ${extractedSymptoms.length} new symptoms:\n${extractedSymptoms.map(s => `• ${s}`).join('\n')}`);
+            showSection('main-menu');
+        }
+
+        function removeSymptom(id) {
+            symptoms = symptoms.filter(symptom => symptom.id !== id);
+            predictions = mockPrediction(symptoms);
+            updateRemoveSymptomsList();
+            updateButtonStates();
+        }
+
+        function clearAll() {
+            if (symptoms.length === 0) return;
+
+            if (confirm('Are you sure you want to clear all symptoms?')) {
+                symptoms = [];
+                predictions = [];
+                updateButtonStates();
+                alert('All symptoms cleared successfully!');
+            }
+        }
+
+        function updateRemoveSymptomsList() {
+            const container = document.getElementById('remove-symptoms-list');
+
+            if (symptoms.length === 0) {
+                container.innerHTML = '<div class="empty-state">No symptoms to remove.</div>';
+                return;
+            }
+
+            container.innerHTML = symptoms.map(symptom => `
+                <div class="symptom-item">
+                    <span class="symptom-name">${symptom.name}</span>
+                    <button class="remove-btn" onclick="removeSymptom(${symptom.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function updateCurrentStatus() {
+            // Update symptom count
+            document.getElementById('symptom-count').textContent = symptoms.length;
+
+            // Update symptoms list
+            const symptomsContainer = document.getElementById('current-symptoms-list');
+            if (symptoms.length === 0) {
+                symptomsContainer.innerHTML = '<div class="empty-state">No symptoms recorded yet.</div>';
+            } else {
+                symptomsContainer.innerHTML = symptoms.map((symptom, index) => `
+                    <div class="symptom-item">
+                        <span><strong>${index + 1}.</strong> ${symptom.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Update predictions
+            const predictionsContainer = document.getElementById('predictions-container');
+            const predictionsList = document.getElementById('predictions-list');
+
+            if (predictions.length > 0) {
+                predictionsContainer.style.display = 'block';
+                predictionsList.innerHTML = predictions.map(disease => {
+                    const confidenceClass = disease.confidence < 30 ? 'confidence-low' :
+                                          disease.confidence < 70 ? 'confidence-medium' : 'confidence-high';
+                    const confidenceLabel = disease.confidence < 30 ? 'LOW CONFIDENCE' :
+                                          disease.confidence < 70 ? 'MEDIUM CONFIDENCE' : 'HIGH CONFIDENCE';
+                    const confidenceIcon = disease.confidence < 30 ? '🟢' :
+                                         disease.confidence < 70 ? '🟡' : '🔴';
+
+                    return `
+                        <div class="prediction-item">
+                            <div class="prediction-header">
+                                <div class="disease-name">${disease.name}</div>
+                                <div class="confidence-badge ${confidenceClass}">
+                                    ${confidenceIcon} ${confidenceLabel}
+                                </div>
+                            </div>
+                            <div class="confidence-value">Confidence: ${disease.confidence.toFixed(2)}%</div>
+                            <div class="recommendation">💡 Recommendation: ${disease.recommendation}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                predictionsContainer.style.display = 'none';
+            }
+        }
+
+        // Initialize the application
+        updateButtonStates();
+
+    </script>
+</body>
+</html>
